@@ -4,7 +4,7 @@ import streamlit as st
 # =====================================================================
 # TEXTOS PRINCIPAIS (já estão prontos, edite só se quiser)
 # =====================================================================
-NOME_DELE = "Amor"
+NOME_DELE = "Amor 🦊"
 CACHORRA = "Gretha"
 PRESENTE = "Seu presente de verdade está te esperando."
 MENSAGEM_FINAL = (
