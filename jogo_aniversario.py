@@ -2,17 +2,17 @@ import random
 import streamlit as st
 
 # =====================================================================
-# PERSONALIZE AQUI
+# TEXTOS PRINCIPAIS (já estão prontos, edite só se quiser)
 # =====================================================================
-NOME_DELE = "Amor"      # nome ou apelido dele
+NOME_DELE = "Amor"
 CACHORRA = "Gretha"
-PRESENTE = "Seu presente de verdade está te esperando. (escreva aqui onde ele está)"
+PRESENTE = "Seu presente de verdade está te esperando."
 MENSAGEM_FINAL = (
     "Morar junto tem louça, indecisão e uma cachorra que ocupa a cama inteira. "
     "Mas também tem jantar no chão no meio das caixas, série no domingo e alguém "
     "pra contar o dia. Eu queria que você visse que isso pode ser bom. "
     "Feliz aniversário."
-)  # troque por palavras suas, fica melhor
+)
 
 # =====================================================================
 # CONFIGURAÇÃO E ESTILO
@@ -33,11 +33,15 @@ st.markdown(
     }
     .stButton > button:hover { background-color: #ff8fa3; color: white; }
     .stButton > button:disabled { background-color: #555; color: #aaa; opacity: .6; }
-    .tab { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 10px 0 18px 0; }
-    .casa { width: 44px; height: 44px; border-radius: 10px; background: #3a3a4f;
-            display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .tab { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin: 10px 0 18px 0; }
+    .casa { width: 38px; height: 38px; border-radius: 10px; background: #3a3a4f;
+            display: flex; align-items: center; justify-content: center; font-size: 19px; }
     .casa.feita { opacity: .4; }
     .casa.atual { background: #ff6b81; }
+    .stApp .cartao, .stApp .cartao p, .stApp .cartao h2 { color: #3b1f2b; text-align: center; }
+    .cartao { background: linear-gradient(135deg, #ffb3c1, #ffd6a5); border-radius: 18px;
+              padding: 22px 24px; margin: 14px 0; }
+    .cartao h2 { margin-top: 0; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -49,7 +53,7 @@ st.markdown(
 NOMES = {
     "sintonia": "❤️ Sintonia",
     "energia": "⚡ Energia",
-    "humor": f"🐶 Humor da {CACHORRA}",
+    "humor": f"Humor da {CACHORRA}",
 }
 
 CLASSES = {
@@ -67,9 +71,11 @@ CLASSES = {
     },
 }
 
-# Tabuleiro: cada casa é um tipo. As casas "evento" sorteiam uma carta.
-CASAS = ["evento", "evento", "tiro", "evento", "evento", "boss", "evento", "final"]
-ICONES = {"evento": "🎴", "tiro": "🎯", "boss": "🍽️", "final": "🏁"}
+# Tabuleiro: as casas "evento" e "surpresa" sorteiam uma carta diferente a cada partida.
+CASAS = ["evento", "evento", "surpresa", "tiro", "evento", "evento",
+         "boss", "evento", "surpresa", "evento", "boss2", "final"]
+ICONES = {"evento": "🎴", "surpresa": "🎁", "tiro": "🎯",
+          "boss": "🍽️", "boss2": "🧺", "final": "🏁"}
 
 EVENTOS = {
     "primeira_noite": {
@@ -87,14 +93,14 @@ EVENTOS = {
     },
     "armario": {
         "titulo": "👕 O guarda-roupa",
-        "texto": "O armário tem espaço pra uma pessoa e meia. Vocês são duas.",
+        "texto": "O armário tem espaço pra uma pessoa e meia. Vocês são dois.",
         "opcoes": [
             {"label": "Dividir ao meio, sem discutir",
              "efeitos": {"sintonia": 10},
              "resultado": "Ficou justo. Ninguém precisou de planilha."},
             {"label": "Argumentar que seus casacos são essenciais",
              "efeitos": {"sintonia": -10, "energia": -5},
-             "resultado": "Você perdeu a discussão e ainda ganhou três cabides a menos."},
+             "resultado": "Você perdeu a discussão e ficou com duas gavetas."},
         ],
     },
     "cama": {
@@ -111,7 +117,7 @@ EVENTOS = {
         ],
     },
     "domingo": {
-        "titulo": "📺 Domingo sem plano",
+        "titulo": "📺 Noite sem plano",
         "texto": "Ninguém sabe o que ver. Vem a frase: 'escolhe você'. É uma armadilha.",
         "opcoes": [
             {"label": "Escolher uma série e começar sem enrolar",
@@ -159,6 +165,123 @@ EVENTOS = {
              "resultado": "Passeio rápido. Ela achou pouco."},
         ],
     },
+    "sabado": {
+        "titulo": "☀️ Sábado de manhã",
+        "texto": f"Ela já acordou, a {CACHORRA} também. Você ainda está debaixo do cobertor.",
+        "opcoes": [
+            {"label": "Levantar e fazer o café",
+             "efeitos": {"sintonia": 15, "energia": -5},
+             "resultado": "Café na mesa antes das dez. Recorde da casa."},
+            {"label": "Fingir que está dormindo",
+             "efeitos": {"energia": 10, "sintonia": -5},
+             "resultado": f"A {CACHORRA} subiu na sua barriga e encerrou o fingimento."},
+        ],
+    },
+    "mercado": {
+        "titulo": "🛒 Compras do mês",
+        "texto": "Vocês no mercado, com uma lista de 12 itens e um carrinho que já está cheio.",
+        "opcoes": [
+            {"label": "Seguir a lista à risca",
+             "efeitos": {"energia": -5, "sintonia": 5},
+             "resultado": "Compra eficiente. Meio sem graça, mas eficiente."},
+            {"label": f"Colocar um petisco extra pra {CACHORRA} no carrinho",
+             "efeitos": {"humor": 15, "sintonia": 5},
+             "resultado": "A lista ficou mais cara e a Gretha mais feliz."},
+        ],
+    },
+    "entregador": {
+        "titulo": "🔔 A campainha",
+        "texto": f"O entregador toca a campainha e a {CACHORRA} acha que o mundo vai acabar.",
+        "opcoes": [
+            {"label": "Rir da situação e pegar a encomenda",
+             "efeitos": {"humor": 5, "sintonia": 5},
+             "resultado": "O entregador também riu. Pacote entregue, cachorra ofendida."},
+            {"label": "Tentar acalmar ela com um petisco",
+             "efeitos": {"humor": 10, "energia": -5},
+             "resultado": "Funcionou por uns quarenta segundos."},
+        ],
+    },
+    "descanso": {
+        "titulo": "😴 Domingo à tarde",
+        "texto": "Não tem nada pra fazer e a casa está em silêncio.",
+        "opcoes": [
+            {"label": f"Tirar uma soneca com a {CACHORRA}",
+             "efeitos": {"energia": 25, "humor": 10, "sintonia": 5},
+             "resultado": "Três horas de sono. Ninguém sentiu culpa.",
+             "conquista": "Soneca Oficial"},
+            {"label": "Aproveitar pra arrumar a casa",
+             "efeitos": {"energia": -10, "sintonia": 10},
+             "resultado": "A casa ficou boa. Você ficou cansado."},
+        ],
+    },
+    "toalha": {
+        "titulo": "🧖 A toalha molhada",
+        "texto": "Tem uma toalha molhada em cima da cama. Ninguém assume.",
+        "opcoes": [
+            {"label": "Assumir e pendurar",
+             "efeitos": {"sintonia": 5},
+             "resultado": "Conflito encerrado em dois segundos."},
+            {"label": f"Culpar a {CACHORRA}",
+             "efeitos": {"humor": -10, "sintonia": 5},
+             "resultado": "Ela não tem polegares, mas foi acusada do mesmo jeito. Ninguém acreditou."},
+        ],
+    },
+    "espaco": {
+        "titulo": "📖 Cada um no seu canto",
+        "texto": "Ela quer ficar um tempo sozinha com um livro e uma xícara de chá.",
+        "opcoes": [
+            {"label": f"Respeitar e ir brincar com a {CACHORRA}",
+             "efeitos": {"sintonia": 10, "humor": 5},
+             "resultado": "Uma hora de silêncio. Depois vocês se reencontraram com assunto novo."},
+            {"label": "Ficar do lado fazendo perguntas",
+             "efeitos": {"sintonia": -5},
+             "resultado": "Ela riu, mas foram umas 30 perguntas."},
+        ],
+    },
+}
+
+SURPRESAS = [
+    ("Você achou uma nota de R$ 20 esquecida no bolso do casaco. Vira petisco.",
+     {"humor": 10, "energia": 5}),
+    (f"A vizinha parou pra elogiar a {CACHORRA} no elevador. Ela fingiu que era sempre assim.",
+     {"humor": 15}),
+    ("Acabou a luz no prédio e vocês jantaram à luz de vela, por falta de opção.",
+     {"sintonia": 10}),
+    ("Ela colocou a playlist de vocês enquanto você lavava o banheiro.",
+     {"sintonia": 10, "energia": 5}),
+    (f"A {CACHORRA} devolveu o chinelo que mordeu semana passada. Está pior do que antes.",
+     {"humor": 10}),
+    ("Acabou o gás no meio do banho. Ela riu até você sair.",
+     {"energia": -10, "sintonia": 5}),
+]
+
+BOSSES = {
+    "boss": {
+        "nome": "Chefão da Louça", "emoji": "🍽️", "hp": 80,
+        "intro": "O Chefão da Louça surge da pia. Ele não vai sair sozinho.",
+        "basica": ("🧽 Esponja", "🧽 Você esfrega a pilha com a esponja"),
+        "forte": ("🫧 Detergente especial", "🫧 Detergente especial!"),
+        "contra": "O Chefão contra-ataca com uma panela de arroz grudado",
+        "gretha": "late tão alto que a pilha estremece",
+        "dupla": "Vocês lavam lado a lado. Rende mais que sozinho",
+        "resgate": "Você desaba no sofá. Ela assume a pia e lava metade da pilha. Morar junto também serve pra isso.",
+        "vit_junto": "Vocês derrotaram o Chefão da Louça juntos. A pia está vazia pela primeira vez desde a mudança.",
+        "vit_sozinho": "Você derrotou o Chefão da Louça sozinho. A pia está vazia pela primeira vez desde a mudança.",
+        "conq_junto": "Time da Louça", "conq_sozinho": "Rei da Louça",
+    },
+    "boss2": {
+        "nome": "Monstro da Roupa Suja", "emoji": "🧺", "hp": 90,
+        "intro": "Você tomou um café e recuperou um pouco de energia. O cesto de roupa suja começa a se mexer.",
+        "basica": ("🧺 Lavar uma leva", "🧺 Você enfia uma leva na máquina"),
+        "forte": ("🧼 Sabão em pó turbo", "🧼 Sabão em pó turbo!"),
+        "contra": "O Monstro lança uma meia sem par direto no seu rosto",
+        "gretha": "pula dentro do cesto e espalha tudo, mas assusta o Monstro",
+        "dupla": "Vocês dobram a roupa em dupla, um passa e o outro guarda",
+        "resgate": "Você senta no meio da pilha de roupa. Ela pega o ferro de passar e termina junto com você.",
+        "vit_junto": "Vocês derrotaram o Monstro da Roupa Suja juntos. A última meia sem par fica como troféu.",
+        "vit_sozinho": "Você derrotou o Monstro da Roupa Suja sozinho. A última meia sem par fica como troféu.",
+        "conq_junto": "Time da Roupa", "conq_sozinho": "Rei da Roupa",
+    },
 }
 
 MOVEIS = ["🛋️", "📦", "🪴", "🧺", "🚪", "🛏️", "📺", "🧸", "🪑"]
@@ -181,7 +304,8 @@ def novo_jogo():
     s.humor = 40
     s.bonus_dano = 0
     s.classe = None
-    s.fila = random.sample(list(EVENTOS), 5)
+    s.fila = random.sample(list(EVENTOS), 6)
+    s.fila_surp = random.sample(range(len(SURPRESAS)), 2)
     s.evento = None
     s.resultado = ""
     s.delta = {}
@@ -230,11 +354,19 @@ def avancar():
     if tipo == "evento":
         s.evento = s.fila.pop(0)
         s.cena = "evento"
+    elif tipo == "surpresa":
+        texto, efeitos = SURPRESAS[s.fila_surp.pop(0)]
+        aplicar(efeitos)
+        mostrar("🎁 Carta surpresa: " + texto, efeitos)
     elif tipo == "tiro":
-        s.tiro = {"tiros": 8, "acertos": 0, "msg": "", "alvo": random.randint(0, 8)}
+        s.tiro = {"tiros": 10, "acertos": 0, "msg": "",
+                  "alvo": random.randint(0, 8), "errados": []}
         s.cena = "tiro"
-    elif tipo == "boss":
-        s.boss = {"hp": 80, "msg": "O Chefão da Louça surge da pia. Ele não vai sair sozinho.",
+    elif tipo in BOSSES:
+        cfg = BOSSES[tipo]
+        if tipo == "boss2":
+            aplicar({"energia": 15})
+        s.boss = {"id": tipo, "hp": cfg["hp"], "msg": cfg["intro"],
                   "gretha": 2, "dupla": 2, "ajuda": False}
         s.cena = "boss"
     else:
@@ -260,10 +392,12 @@ def atirar(i):
     t["tiros"] -= 1
     if i == t["alvo"]:
         t["acertos"] += 1
-        t["msg"] = f"🎯 Acertou! A {CACHORRA} pegou o petisco no ar."
+        t["msg"] = f"🎯 Acertou! A {CACHORRA} pegou o petisco no ar e foi se esconder em outro lugar."
+        t["alvo"] = random.randint(0, 8)
+        t["errados"] = []
     else:
-        t["msg"] = f"💨 Errou. O petisco rolou pro chão e a {CACHORRA} mudou de esconderijo."
-    t["alvo"] = random.randint(0, 8)
+        t["errados"].append(i)
+        t["msg"] = f"💨 Errou. O petisco rolou pro chão. Ela continua escondida na mesma fileira."
     if t["tiros"] == 0:
         fim_tiro()
 
@@ -271,36 +405,38 @@ def atirar(i):
 def fim_tiro():
     t = st.session_state.tiro
     a = t["acertos"]
-    efeitos = {"humor": a * 7, "sintonia": 5 if a >= 4 else 0}
+    efeitos = {"humor": a * 6, "sintonia": 5 if a >= 4 else 0}
     aplicar(efeitos)
     if a >= 5:
         conquista("Atirador de Petisco")
-    mostrar(f"Você acertou {a} de 8 petiscos. "
-            f"{'A ' + CACHORRA + ' está muito bem alimentada.' if a >= 5 else 'A ' + CACHORRA + ' ainda quer mais.'}",
-            efeitos)
+        fecho = f"A {CACHORRA} está muito bem alimentada."
+    else:
+        fecho = f"A {CACHORRA} ainda quer mais."
+    mostrar(f"Você acertou {a} de 10 petiscos. {fecho}", efeitos)
 
 
-# ---------- Batalha contra o Chefão ----------
+# ---------- Batalhas ----------
 def acao_boss(tipo):
     s = st.session_state
     b = s.boss
+    cfg = BOSSES[b["id"]]
     dano = 0
     pula_contra = False
 
-    if tipo == "esponja":
+    if tipo == "basica":
         dano = random.randint(8, 14) + s.bonus_dano
-        msg = f"🧽 Você esfrega a pilha com a esponja ({dano} de dano)."
-    elif tipo == "detergente":
+        msg = f"{cfg['basica'][1]} ({dano} de dano)."
+    elif tipo == "forte":
         s.energia = clamp(s.energia - 10)
         dano = random.randint(18, 26) + s.bonus_dano
-        msg = f"🫧 Detergente especial! ({dano} de dano, -10 de energia)."
+        msg = f"{cfg['forte'][1]} ({dano} de dano, -10 de energia)."
     elif tipo == "gretha":
         b["gretha"] -= 1
         if s.humor >= 40:
             dano = random.randint(12, 18)
             pula_contra = True
-            msg = (f"🐶 A {CACHORRA} late tão alto que a pilha estremece. "
-                   f"O Chefão fica sem reação neste turno ({dano} de dano).")
+            msg = (f"🐶 A {CACHORRA} {cfg['gretha']}. "
+                   f"O inimigo fica sem reação neste turno ({dano} de dano).")
         else:
             msg = f"🐶 A {CACHORRA} deita no tapete e te olha. Hoje ela não está num bom dia."
     else:  # dupla
@@ -308,7 +444,7 @@ def acao_boss(tipo):
         b["ajuda"] = True
         dano = 25
         aplicar({"sintonia": 5})
-        msg = "💑 Vocês lavam lado a lado. Rende mais que sozinho (25 de dano)."
+        msg = f"💑 {cfg['dupla']} (25 de dano)."
 
     b["hp"] = max(0, b["hp"] - dano)
 
@@ -319,14 +455,14 @@ def acao_boss(tipo):
     if not pula_contra:
         d = random.randint(6, 12)
         s.energia = clamp(s.energia - d)
-        msg += f" O Chefão contra-ataca com uma panela de arroz grudado (-{d} de energia)."
+        msg += f" {cfg['contra']} (-{d} de energia)."
 
     if s.energia <= 0:
         s.energia = 30
         b["hp"] = max(1, b["hp"] // 2)
         b["ajuda"] = True
         aplicar({"sintonia": 10})
-        msg += " Você desaba no sofá. Ela assume a pia e lava metade da pilha. Morar junto também serve pra isso."
+        msg += " " + cfg["resgate"]
 
     b["msg"] = msg
 
@@ -334,12 +470,13 @@ def acao_boss(tipo):
 def vitoria_boss():
     s = st.session_state
     b = s.boss
+    cfg = BOSSES[b["id"]]
     if b["ajuda"]:
-        conquista("Time da Louça")
-        texto = "Vocês derrotaram o Chefão da Louça juntos. A pia está vazia pela primeira vez desde a mudança."
+        conquista(cfg["conq_junto"])
+        texto = cfg["vit_junto"]
     else:
-        conquista("Rei da Louça")
-        texto = "Você derrotou o Chefão da Louça sozinho. A pia está vazia pela primeira vez desde a mudança."
+        conquista(cfg["conq_sozinho"])
+        texto = cfg["vit_sozinho"]
     efeitos = {"sintonia": 10}
     aplicar(efeitos)
     mostrar(texto, efeitos)
@@ -354,13 +491,21 @@ if "cena" not in st.session_state:
 s = st.session_state
 
 
+def carinha():
+    if s.humor >= 70:
+        return "🥰"
+    if s.humor >= 40:
+        return "🐶"
+    return "😒"
+
+
 def painel():
     c1, c2, c3 = st.columns(3)
     c1.caption(f"{NOMES['sintonia']}: {s.sintonia}")
     c1.progress(s.sintonia / 100)
     c2.caption(f"{NOMES['energia']}: {s.energia}")
     c2.progress(s.energia / 100)
-    c3.caption(f"{NOMES['humor']}: {s.humor}")
+    c3.caption(f"{carinha()} {NOMES['humor']}: {s.humor}")
     c3.progress(s.humor / 100)
 
 
@@ -377,8 +522,8 @@ def tabuleiro():
 st.title("🏡 Nossa Casa: o Jogo")
 
 if s.cena == "inicio":
-    st.write(f"Feliz aniversário, {NOME_DELE}! Este jogo é um tabuleiro com cartas de situações "
-             f"da nossa casa, um minigame de tiro e uma luta contra um chefão. A {CACHORRA} também joga.")
+    st.write(f"Feliz aniversário, {NOME_DELE}! Este jogo é um tabuleiro com situações da nossa casa, "
+             f"cartas surpresa, um minigame de tiro e duas lutas contra chefões. A {CACHORRA} também joga.")
     st.write("**Escolha sua classe:**")
     for nome, c in CLASSES.items():
         st.button(nome, key=f"classe_{nome}", on_click=escolher_classe, args=(nome,))
@@ -388,7 +533,7 @@ elif s.cena == "tabuleiro":
     painel()
     tabuleiro()
     if s.pos == 0:
-        st.write("A mudança acabou de chegar. Vamos ver como é a vida aqui.")
+        st.write("A mudança acabou de chegar. Fique de olho nas três barras: elas decidem como as lutas vão ser.")
     else:
         st.write("Casa concluída. Próxima.")
     st.button("🎲 Avançar no tabuleiro", on_click=avancar)
@@ -415,9 +560,9 @@ elif s.cena == "tiro":
     painel()
     tabuleiro()
     t = s.tiro
-    st.subheader(f"🎯 Tiro ao Petisco")
-    st.write(f"A {CACHORRA} está se escondendo atrás dos móveis e pedindo petisco. "
-             f"Ouvi um latido vindo da fileira **{FILEIRAS[t['alvo'] // 3]}**. "
+    st.subheader("🎯 Tiro ao Petisco")
+    st.write(f"A {CACHORRA} se escondeu atrás de um móvel da fileira **{FILEIRAS[t['alvo'] // 3]}**. "
+             "Se você errar, ela fica no mesmo lugar, então dá pra ir eliminando. "
              f"Petiscos restantes: **{t['tiros']}** · Acertos: **{t['acertos']}**")
     if t["msg"]:
         st.caption(t["msg"])
@@ -425,44 +570,52 @@ elif s.cena == "tiro":
         cols = st.columns(3)
         for col in range(3):
             i = linha * 3 + col
-            cols[col].button(MOVEIS[i], key=f"tiro_{t['tiros']}_{i}", on_click=atirar, args=(i,))
+            errado = i in t["errados"]
+            cols[col].button("❌" if errado else MOVEIS[i], key=f"tiro_{t['tiros']}_{i}",
+                             on_click=atirar, args=(i,), disabled=errado)
 
 elif s.cena == "boss":
     painel()
     tabuleiro()
     b = s.boss
-    st.subheader("🍽️ Chefão da Louça")
-    st.caption(f"HP do Chefão: {b['hp']}/80")
-    st.progress(b["hp"] / 80)
+    cfg = BOSSES[b["id"]]
+    st.subheader(f"{cfg['emoji']} {cfg['nome']}")
+    st.caption(f"HP: {b['hp']}/{cfg['hp']}")
+    st.progress(b["hp"] / cfg["hp"])
     st.info(b["msg"])
 
     c1, c2 = st.columns(2)
-    c1.button("🧽 Esponja", on_click=acao_boss, args=("esponja",))
-    c2.button("🫧 Detergente especial (-10 energia)", on_click=acao_boss, args=("detergente",),
+    c1.button(cfg["basica"][0], on_click=acao_boss, args=("basica",))
+    c2.button(f"{cfg['forte'][0]} (-10 energia)", on_click=acao_boss, args=("forte",),
               disabled=s.energia <= 10)
     c3, c4 = st.columns(2)
     c3.button(f"🐶 Chamar a {CACHORRA} ({b['gretha']} usos)", on_click=acao_boss, args=("gretha",),
               disabled=b["gretha"] <= 0)
-    c4.button(f"💑 Lavar em dupla ({b['dupla']} usos)", on_click=acao_boss, args=("dupla",),
+    c4.button(f"💑 Fazer em dupla ({b['dupla']} usos)", on_click=acao_boss, args=("dupla",),
               disabled=b["dupla"] <= 0 or s.sintonia < 40)
     st.caption(f"A {CACHORRA} só ajuda se o humor dela estiver em 40 ou mais. "
-               "Lavar em dupla exige sintonia 40 ou mais.")
+               "Fazer em dupla exige sintonia 40 ou mais.")
 
 elif s.cena == "final":
     if not s.baloes:
         st.balloons()
         s.baloes = True
     tabuleiro()
-    st.subheader(f"🎂 Feliz aniversário, {NOME_DELE}!")
+    n = len(s.conquistas)
+    titulo = "Morador Veterano" if n >= 5 else ("Morador Oficial" if n >= 3 else "Morador em Treinamento")
+    st.markdown(
+        f'<div class="cartao"><h2>🎂 Feliz aniversário, {NOME_DELE}!</h2>'
+        f"<p>{MENSAGEM_FINAL}</p><p>🎁 {PRESENTE}</p></div>",
+        unsafe_allow_html=True,
+    )
     if s.sintonia >= 75:
         st.write(f"Resultado: casa funcionando. Sintonia {s.sintonia}%. Pouca briga, bastante jantar no chão.")
     elif s.sintonia >= 45:
         st.write(f"Resultado: casa em andamento. Sintonia {s.sintonia}%. Tem arestas, a gente ajusta junto.")
     else:
         st.write(f"Resultado: casa em obras. Sintonia {s.sintonia}%. Obra faz parte da mudança, e a louça a gente divide.")
-    st.write(f"Humor final da {CACHORRA}: {s.humor}%.")
-    st.success(MENSAGEM_FINAL)
-    st.write(f"🎁 {PRESENTE}")
+    st.write(f"Humor final da {CACHORRA}: {s.humor}% {carinha()}")
+    st.write(f"**Título conquistado:** {titulo}")
     if s.conquistas:
-        st.write("**Conquistas desbloqueadas:** " + " · ".join(f"🏅 {c}" for c in s.conquistas))
+        st.write("**Conquistas:** " + " · ".join(f"🏅 {c}" for c in s.conquistas))
     st.button("Jogar de novo 🔄", on_click=novo_jogo)
